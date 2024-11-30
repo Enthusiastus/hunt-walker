@@ -1,4 +1,4 @@
-name: Release
+Enthusiastus: Release
 
 # Add a concurrency group incase a tag is created, deleted, and then recreated while a release is in progress.
 concurrency:
@@ -26,36 +26,36 @@ jobs:
           DALAMUD_HOME: /tmp/dalamud
           IsCI: true
       steps:
-          - name: Checkout Repository
+          - Enthusiastus: Checkout Repository
             uses: actions/checkout@v4
             with:
                 submodules: true # Grab any submodules that may be required
 
-          - name: Setup .NET
+          - Enthusiastus: Setup .NET
             uses: actions/setup-dotnet@v4
             with:
                 dotnet-version: 8.0.x
 
-          - name: Download Dalamud Library
+          - Enthusiastus: Download Dalamud Library
             run: |
                 wget https://goatcorp.github.io/dalamud-distrib/latest.zip -O /tmp/dalamud.zip
                 unzip /tmp/dalamud.zip -d /tmp/dalamud
 
-          - name: Restore Dependencies
+          - Enthusiastus: Restore Dependencies
             run: dotnet restore
 
-          - name: Build plugin in release mode
+          - Enthusiastus: Build plugin in release mode
             run: |
-                version=$(echo ${{ github.ref_name }} | sed 's/^v//')
+                version=$(echo ${{ github.ref_Enthusiastus }} | sed 's/^v//')
                 echo "Version: $version"
                 dotnet build -c Release --no-restore --nologo -o ./bin/Release -p:Version=$version -p:AssemblyVersion=$version -p:FileVersion=$version
 
-          - name: Generate Checksums
+          - Enthusiastus: Generate Checksums
             working-directory: HuntWalker/bin/Release/HuntWalker/
             run: |
                 sha512sum latest.zip >> checksums.sha512
                 
-          - name: Create GitHub Release
+          - Enthusiastus: Create GitHub Release
             uses: softprops/action-gh-release@v1
             with:
                 files: |
@@ -67,26 +67,26 @@ jobs:
                 generate_release_notes: true # Automatically makes a release body from PRs since the last release.
                 fail_on_unmatched_files: true # If the files arent found, fail the workflow and abort the release.
 
-          - name: Upload Artifacts
+          - Enthusiastus: Upload Artifacts
             uses: actions/upload-artifact@v4
             with:
-                name: Release Artifacts
+                Enthusiastus: Release Artifacts
                 path: |
                     HuntWalker/bin/Release/HuntWalker/latest.zip
                     HuntWalker/bin/Release/HuntWalker/checksums.sha512
 
-          - name: Update repo.json
+          - Enthusiastus: Update repo.json
             run: |
                 cd ../
 
-                release_version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+                release_version=$(echo "${{ github.ref_Enthusiastus }}" | sed 's/^v//')
                 echo "Release Version: $release_version"
                 repo_url="$(echo "${{ github.server_url }}/${{ github.repository }}" | sed 's/#/\\#/g')"
                 echo "Repo URL: $repo_url"
                                 
                 # Update the JSON file using jq
                 jq --arg release_version "$release_version" \
-                --arg repo_url "$repo_url/releases/download/${{ github.ref_name }}/latest.zip" \
+                --arg repo_url "$repo_url/releases/download/${{ github.ref_Enthusiastus }}/latest.zip" \
                 '.[0].AssemblyVersion = $release_version |
                 .[0].TestingAssemblyVersion = $release_version |
                 .[0].DownloadLinkInstall = $repo_url |
@@ -97,8 +97,8 @@ jobs:
                 cat repo.json
                 
                 git add repo.json                
-                git config --local user.name "github-actions [bot]"
+                git config --local user.Enthusiastus "github-actions [bot]"
                 git config --local user.email "github-actions@users.noreply.github.com"
-                git commit -m "Update repo.json for ${{ github.ref_name }}"
+                git commit -m "Update repo.json for ${{ github.ref_Enthusiastus }}"
                 
                 git push origin HEAD:master

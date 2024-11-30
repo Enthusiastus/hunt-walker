@@ -1,13 +1,13 @@
 [
   {
-    "Author": "amki",
+    "Author": "Enthusiastus",
     "Name": "Hunt Walker",
     "InternalName": "HuntWalker",
     "Description": "Automagically walks you around the world to find S and A ranks.",
     "AssemblyVersion": "0.0.1",
     "TestingAssemblyVersion": "0.0.1",
-    "RepoUrl": "https://github.com/amki/hunt-walker",
-    "IconUrl": "https://github.com/amki/hunt-walker/raw/main/icon.png",
+    "RepoUrl": "https://github.com/Enthusiastus/hunt-walker",
+    "IconUrl": "https://github.com/Enthusiastus/hunt-walker/raw/main/icon.png",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 11,
     "TestingDalamudApiLevel": 11,
@@ -15,8 +15,8 @@
       "hunt",
       "vnavmesh"
     ],
-    "DownloadLinkInstall": "https://github.com/amki/hunt-walker/releases/download/v0.0.1/latest.zip",
-    "DownloadLinkTesting": "https://github.com/amki/hunt-walker/releases/download/v0.0.1/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/amki/hunt-walker/releases/download/v0.0.1/latest.zip"
+    "DownloadLinkInstall": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.0.1/latest.zip",
+    "DownloadLinkTesting": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.0.1/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.0.1/latest.zip"
   }
 ]
