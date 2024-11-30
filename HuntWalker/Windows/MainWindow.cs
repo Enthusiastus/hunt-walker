@@ -50,16 +50,16 @@ public class MainWindow : Window, IDisposable
         }
         */
 
-        if (ImGui.Button("Scout Kholusia"))
-        {
-            chat.Print("Beginning to scout Kholusia");
-            movementManager.ScoutKholusia();
-        }
-
         if (ImGui.Button("Scout Lakeland"))
         {
             chat.Print("Beginning to scout Lakeland");
             movementManager.ScoutLakeland();
+        }
+
+        if (ImGui.Button("Scout Kholusia"))
+        {
+            chat.Print("Beginning to scout Kholusia");
+            movementManager.ScoutKholusia();
         }
 
         if (ImGui.Button("Scout Ahm Ahreng"))
