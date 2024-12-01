@@ -340,7 +340,8 @@ public class MovementManager : IDisposable {
         log.Debug(movementTasks.NumQueuedTasks+" Tasks left.");
         if (movementTasks.NumQueuedTasks == 0)
         {
-            OnMovementDone.Invoke(this, EventArgs.Empty);
+            if (!NavReady || IsRunning || IsPathfinding || IsBusy || !CanAct)
+                OnMovementDone.Invoke(this, EventArgs.Empty);
             return;
         }
 
