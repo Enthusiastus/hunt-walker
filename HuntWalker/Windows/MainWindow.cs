@@ -69,6 +69,11 @@ public class MainWindow : Window, IDisposable
             chat.Print("I am in " + Dalamud.ClientState.TerritoryType);
         }
 
+        if (ImGui.Button("DEBUG TP"))
+        {
+            movementManager.DEBUG();
+        }
+
         if (ImGui.Button("Get Position"))
         {
             chat.Print("I am at " + Dalamud.ClientState.LocalPlayer.Position);

@@ -387,13 +387,19 @@ public class MovementManager : IDisposable {
         }
     }
 
+    public void DEBUG()
+    {
+        Lifestream_IPCSubscriber.Teleport(136, 0);
+    }
+
     public void ScoutLakeland()
     {
         targetTerritory = 813;
         Stop();
         if (Dalamud.ClientState.TerritoryType != 813)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp The Ostall Imperative");
+            // The Ostall Imperative
+            Lifestream_IPCSubscriber.Teleport(136, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -417,7 +423,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 814)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Tomra");
+            // Tomra
+            Lifestream_IPCSubscriber.Teleport(139, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -440,7 +447,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 815)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Twine");
+            // Twine
+            Lifestream_IPCSubscriber.Teleport(141, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -464,7 +472,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 816)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Lydha Lran");
+            // Lydha Lran
+            Lifestream_IPCSubscriber.Teleport(144, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -488,7 +497,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 817)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Slitherbough");
+            // Slitherbough
+            Lifestream_IPCSubscriber.Teleport(142, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -512,7 +522,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 818)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Ondo Cups");
+            // The Ondo Cups
+            Lifestream_IPCSubscriber.Teleport(147, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -536,7 +547,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 956)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp The Archeion");
+            // The Archeion
+            Lifestream_IPCSubscriber.Teleport(166, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -560,7 +572,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 957)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Yedlihmad");
+            // Yedlihmad
+            Lifestream_IPCSubscriber.Teleport(169, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -584,7 +597,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 958)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Camp Broken Glass");
+            // Camp Broken Glass
+            Lifestream_IPCSubscriber.Teleport(172, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -608,7 +622,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 959)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Sinus Lacrimarum");
+            // Sinus Lacrimarum
+            Lifestream_IPCSubscriber.Teleport(174, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -632,7 +647,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 960)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp Reah Tahra");
+            // Reah Tahra
+            Lifestream_IPCSubscriber.Teleport(179, 0);
         }
 
         movementTasks.Enqueue(() => {
@@ -656,7 +672,8 @@ public class MovementManager : IDisposable {
         Stop();
         if (Dalamud.ClientState.TerritoryType != 961)
         {
-            Lifestream_IPCSubscriber.ExecuteCommand("tp The Twelve Wonders");
+            // The Twelve Wonders
+            Lifestream_IPCSubscriber.Teleport(177, 0);
         }
 
         movementTasks.Enqueue(() => {

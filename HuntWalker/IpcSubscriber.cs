@@ -138,6 +138,9 @@ namespace HuntWalker
         [EzIPC("Lifestream.ExecuteCommand", applyPrefix: false)]
         internal static readonly Action<string> ExecuteCommand;
 
+        [EzIPC("Lifestream.Teleport", applyPrefix: false)]
+        internal static readonly Func<uint, byte, bool> Teleport;
+
         [EzIPC("Lifestream.IsBusy", applyPrefix: false)]
         internal static readonly Func<bool> IsBusy;
 
