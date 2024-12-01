@@ -7,6 +7,8 @@ using Dalamud.Plugin.Services;
 using HuntWalker.Windows;
 using HuntWalker.Managers;
 using Microsoft.Extensions.DependencyInjection;
+using ECommons;
+using ECommons.Automation.NeoTaskManager;
 
 namespace HuntWalker;
 
@@ -19,7 +21,7 @@ public sealed class Plugin : IDalamudPlugin
     //[PluginService] internal static IChatGui chatGui { get; private set; } = null!;
     //[PluginService] internal static IPluginLog pluginLog { get; private set; } = null!;
 
-    private const string CommandName = "/pmycommand";
+    private const string CommandName = "/hw";
 
     public Configuration Configuration { get; init; }
 
@@ -34,6 +36,8 @@ public sealed class Plugin : IDalamudPlugin
     {
         this.pluginInterface = pluginInterface;
         Dalamud.Initialize(pluginInterface);
+        ECommonsMain.Init(pluginInterface, this);
+        
         Configuration = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
         // you might normally want to embed resources and load them from the manifest stream

@@ -8,6 +8,7 @@ using System.Numerics;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Game.ClientState.Conditions;
 using HuntWalker.Models;
+using ECommons.Automation.NeoTaskManager;
 
 namespace HuntWalker.Managers;
 
@@ -250,22 +251,17 @@ public class MovementManager : IDisposable {
         10634 // Arch-eta
     };
 
-    private readonly IChatGui _chat;
-    private readonly IPluginLog _log;
-    private readonly ICallGateSubscriber<bool> _vnavIsReady;
-    private readonly ICallGateSubscriber<int> _vnavNumWaypoints;
-    private readonly ICallGateSubscriber<Vector3, bool, bool> _vnavSimpleMoveTo;
-    private readonly ICallGateSubscriber<bool> _vnavStop;
-    private readonly ICallGateSubscriber<bool> _vnavIsRunning;
-    private readonly ICallGateSubscriber<string, bool> _lifestreamExecuteCommand;
-    private readonly ICallGateSubscriber<bool> _lifestreamIsBusy;
+    private readonly IChatGui chat;
+    private readonly IPluginLog log;
+    private ushort targetTerritory = 0;
+    private int marksFoundInArea = 0;
+
     private TimeSpan _lastUpdate = new(0);
     private TimeSpan _execDelay = new(0, 0, 1);
-    private ushort _targetTerritory = 0;
-    private int _marksFoundInArea = 0;
 
-    private List<Vector3> EnqueuedWaypoints = new();
-    private int WaypointCount = 0;
+    public event EventHandler OnMovementDone;
+
+    private TaskManager movementTasks;
 
     public bool Available { get; private set; } = false;
 
@@ -291,6 +287,15 @@ public class MovementManager : IDisposable {
         }
     }
 
+
+    public bool IsBusy => Lifestream_IPCSubscriber.IsBusy();
+    public bool IsRunning => VNavmesh_IPCSubscriber.Path_IsRunning();
+    public bool IsPathfinding => VNavmesh_IPCSubscriber.Nav_PathfindInProgress();
+    public bool NavReady => VNavmesh_IPCSubscriber.Nav_IsReady();
+
+    private readonly ICallGateSubscriber<TrainMob, bool> hhMarkSeen;
+
+
     // 813 -> Lakeland
 
     public MovementManager(
@@ -298,340 +303,382 @@ public class MovementManager : IDisposable {
         IChatGui chat,
         IPluginLog log
 	) {
-        _chat = chat;
-		_log = log;
+        this.chat = chat;
+		this.log = log;
 		Available = true;
-        _vnavIsReady = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Nav.IsReady");
-        _vnavNumWaypoints = pluginInterface.GetIpcSubscriber<int>("vnavmesh.Path.NumWaypoints");
-        _vnavSimpleMoveTo = pluginInterface.GetIpcSubscriber<Vector3, bool, bool>("vnavmesh.SimpleMove.PathfindAndMoveTo");
-        _vnavStop = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Path.Stop");
-        _vnavIsRunning = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Path.IsRunning");
-        _lifestreamExecuteCommand = pluginInterface.GetIpcSubscriber<string,bool>("Lifestream.ExecuteCommand");
-        _lifestreamIsBusy = pluginInterface.GetIpcSubscriber<bool>("Lifestream.IsBusy");
-        _log.Debug("------ Wow we are instanced!");
+        movementTasks = new TaskManager(new TaskManagerConfiguration(600000, false, true, false, false, true, true));
+        movementTasks.StepMode = true;
+
+        hhMarkSeen = pluginInterface.GetIpcSubscriber<TrainMob, bool>("HH.channel.MarkSeen");
+
+        hhMarkSeen.Subscribe(OnMarkSeen);
+
+        log.Debug("------ Wow we are instanced!");
         Dalamud.Framework.Update += Tick;
     }
     public void OnMarkSeen(TrainMob mark)
     {
-        _chat.Print("We saw " + mark.Name + "("+ mark.MobId+ ")");
-        if(_ARankbNPCIds.Contains(mark.MobId))
+        chat.Print("We saw " + mark.Name + "("+ mark.MobId+ ")");
+        if(movementTasks.NumQueuedTasks > 0 && _ARankbNPCIds.Contains(mark.MobId))
         {
-            _marksFoundInArea += 1;
-            _chat.Print(_marksFoundInArea+"/2 marks found in area.");
+            marksFoundInArea += 1;
+            chat.Print(marksFoundInArea+"/2 marks found in area.");
         }
     }
-
-    private unsafe void DoUpdate(IFramework framework)
-    {
-        _log.Debug("DoUpdate! numwp "+ NumWaypoints() +" ways " + EnqueuedWaypoints.Count + " !rdy " + !IsReady() + " run " + IsRunning() + " busy " + IsBusy() + " !canact " + !CanAct);
-        if (_marksFoundInArea > 1)
-        {
-            _chat.Print("Found all marks in area. Stopping.");
-            Stop();
-            return;
-        }
-        if (EnqueuedWaypoints.Count < 1 || !IsReady() || IsRunning() || IsBusy() || !CanAct) {
-            return;
-        }
-        _log.Debug("Update run");
-        _log.Debug("We are in " + Dalamud.ClientState.TerritoryType + "tgt " + _targetTerritory);
-        if (Dalamud.ClientState.TerritoryType != _targetTerritory)
-        {
-            _log.Debug("We are not in the target territory, not pathing...");
-            return;
-        }
-        var am = ActionManager.Instance();
-        _log.Debug("Are we mounted? " + Dalamud.Conditions[ConditionFlag.Mounted]);
-        if (!Dalamud.Conditions[ConditionFlag.Mounted])
-        {
-            _log.Debug("We are not mounted, mounting...");
-            am->UseAction(ActionType.GeneralAction, 24);
-            return;
-        }        
-        var res = SimpleMoveTo(EnqueuedWaypoints[0], true);
-        _log.Debug("DoUpdate! path find to " + EnqueuedWaypoints[0] +" was " + res);
-        if (res)
-        {
-            EnqueuedWaypoints.RemoveAt(0);
-            _chat.Print("Going to waypoint (" + (WaypointCount - EnqueuedWaypoints.Count) + "/"+WaypointCount + ")");
-            _log.Debug(EnqueuedWaypoints.Count + " Waypoints left...");
-        } else
-        {
-            _log.Debug("Wanted to pathfind & move but could not...");
-        }
-    }
-
-    public void Stop()
-    {
-        EnqueuedWaypoints = new();
-        WaypointCount = 0;
-        _marksFoundInArea = 0;
-        _vnavStop.InvokeAction();
-    }
-
     private void Tick(IFramework framework)
     {
         _lastUpdate += framework.UpdateDelta;
-        if(_lastUpdate > _execDelay)
+        if (_lastUpdate > _execDelay)
         {
             DoUpdate(framework);
             _lastUpdate = new(0);
         }
     }
 
+    private unsafe void DoUpdate(IFramework framework)
+    {
+        log.Debug(movementTasks.NumQueuedTasks+" Tasks left.");
+        if (movementTasks.NumQueuedTasks == 0)
+        {
+            OnMovementDone.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        log.Debug("DoUpdate! !rdy " + !NavReady + " run " + IsRunning + " pathfind " + IsPathfinding + " busy " + IsBusy + " !canact " + !CanAct);
+        if (!NavReady || IsRunning || IsPathfinding || IsBusy || !CanAct)
+            return;
+
+        if (marksFoundInArea > 1)
+        {
+            chat.Print("Found all marks in area. Stopping.");
+            Stop();
+            return;
+        }
+        
+        log.Debug("Update run");
+        log.Debug("We are in " + Dalamud.ClientState.TerritoryType + "tgt " + targetTerritory);
+        if (Dalamud.ClientState.TerritoryType != targetTerritory)
+        {
+            log.Debug("We are not in the target territory, not pathing...");
+            return;
+        }
+        movementTasks.Step();
+        
+    }
+
+    public void Stop()
+    {
+        marksFoundInArea = 0;
+        movementTasks.Abort();
+        VNavmesh_IPCSubscriber.Path_Stop();
+    }
+
+    private unsafe void TryMount()
+    {
+        var am = ActionManager.Instance();
+        log.Debug("Are we mounted? " + Dalamud.Conditions[ConditionFlag.Mounted]);
+        if (!Dalamud.Conditions[ConditionFlag.Mounted])
+        {
+            log.Debug("We are not mounted, mounting...");
+            am->UseAction(ActionType.GeneralAction, 24);
+            return;
+        }
+    }
+
     public void ScoutLakeland()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 813;
         Stop();
-        _targetTerritory = 813;
         if (Dalamud.ClientState.TerritoryType != 813)
         {
-            LifestreamExecuteCommand("tp The Ostall Imperative");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp The Ostall Imperative");
         }
-        EnqueuedWaypoints.AddRange(LakelandWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in LakelandWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutKholusia()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
-        _targetTerritory = 814;
+        targetTerritory = 814;
         Stop();
         if (Dalamud.ClientState.TerritoryType != 814)
         {
-            LifestreamExecuteCommand("tp Tomra");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Tomra");
         }
-        EnqueuedWaypoints.AddRange(KholusiaWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
-    }
 
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in KholusiaWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
+    }
     public void ScoutAhmAhreng()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 815;
         Stop();
-        _targetTerritory = 815;
         if (Dalamud.ClientState.TerritoryType != 815)
         {
-            LifestreamExecuteCommand("tp Twine");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Twine");
         }
-        EnqueuedWaypoints.AddRange(AhmAhrengWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in AhmAhrengWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutIlMheg()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 816;
         Stop();
-        _targetTerritory = 816;
         if (Dalamud.ClientState.TerritoryType != 816)
         {
-            LifestreamExecuteCommand("tp Lydha Lran");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Lydha Lran");
         }
-        EnqueuedWaypoints.AddRange(IlMhegWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in IlMhegWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutRakTika()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 817;
         Stop();
-        _targetTerritory = 817;
         if (Dalamud.ClientState.TerritoryType != 817)
         {
-            LifestreamExecuteCommand("tp Slitherbough");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Slitherbough");
         }
-        EnqueuedWaypoints.AddRange(RakTikaWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in RakTikaWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutTempest()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 818;
         Stop();
-        _targetTerritory = 818;
         if (Dalamud.ClientState.TerritoryType != 818)
         {
-            LifestreamExecuteCommand("tp Ondo Cups");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Ondo Cups");
         }
-        EnqueuedWaypoints.AddRange(TempestWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in TempestWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutLabyrinthos()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 956;
         Stop();
-        _targetTerritory = 956;
         if (Dalamud.ClientState.TerritoryType != 956)
         {
-            LifestreamExecuteCommand("tp The Archeion");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp The Archeion");
         }
-        EnqueuedWaypoints.AddRange(LabyrinthosWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in LabyrinthosWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutThavnair()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 957;
         Stop();
-        _targetTerritory = 957;
         if (Dalamud.ClientState.TerritoryType != 957)
         {
-            LifestreamExecuteCommand("tp Yedlihmad");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Yedlihmad");
         }
-        EnqueuedWaypoints.AddRange(ThavnairWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in ThavnairWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutGarlemald()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 958;
         Stop();
-        _targetTerritory = 958;
         if (Dalamud.ClientState.TerritoryType != 958)
         {
-            LifestreamExecuteCommand("tp Camp Broken Glass");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Camp Broken Glass");
         }
-        EnqueuedWaypoints.AddRange(GarlemaldWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in GarlemaldWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutMareLamentorum()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 959;
         Stop();
-        _targetTerritory = 959;
         if (Dalamud.ClientState.TerritoryType != 959)
         {
-            LifestreamExecuteCommand("tp Sinus Lacrimarum");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Sinus Lacrimarum");
         }
-        EnqueuedWaypoints.AddRange(MareLamentorumWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in MareLamentorumWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutUltimaThule()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 960;
         Stop();
-        _targetTerritory = 960;
         if (Dalamud.ClientState.TerritoryType != 960)
         {
-            LifestreamExecuteCommand("tp Reah Tahra");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp Reah Tahra");
         }
-        EnqueuedWaypoints.AddRange(UltimaThuleWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
+
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
+
+        foreach (var p in UltimaThuleWaypoints)
+        {
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
+        }
     }
 
     public void ScoutElpis()
     {
-        if (EnqueuedWaypoints.Count > 0)
-            return;
+        targetTerritory = 961;
         Stop();
-        _targetTerritory = 961;
         if (Dalamud.ClientState.TerritoryType != 961)
         {
-            LifestreamExecuteCommand("tp The Twelve Wonders");
+            Lifestream_IPCSubscriber.ExecuteCommand("tp The Twelve Wonders");
         }
-        EnqueuedWaypoints.AddRange(ElpisWaypoints);
-        WaypointCount = EnqueuedWaypoints.Count;
-    }
 
-    private bool IsReady()
-    {
-        try
-        {
-            return _vnavIsReady.InvokeFunc();
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Info("VNavMesh is not yet available. Disabling support until it is.");
-            return false;
-        }
-    }
+        movementTasks.Enqueue(() => {
+            TryMount();
+        });
 
-    private int NumWaypoints()
-    {
-        try
+        foreach (var p in ElpisWaypoints)
         {
-            return _vnavNumWaypoints.InvokeFunc();
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Info("VNavMesh is not yet available. Disabling support until it is.");
-            return 0;
-        }
-    }
-    //
-
-    public void LifestreamExecuteCommand(string command)
-    {
-        try
-        {
-            _lifestreamExecuteCommand.InvokeAction(command);
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Warning("Lifestream: Could not execute command "+command+" (IpcNotReadyError)");
-        }
-    }
-
-    public bool IsRunning()
-    {
-        try
-        {
-            return _vnavIsRunning.InvokeFunc();
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Warning("VNavMesh: Could not check if path is running (IpcNotReadyError)");
-            return false;
-        }
-    }
-
-    public bool IsBusy()
-    {
-        try
-        {
-            return _lifestreamIsBusy.InvokeFunc();
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Warning("Lifestream: Could not check if is busy (IpcNotReadyError)");
-            return false;
-        }
-    }
-
-    public bool SimpleMoveTo(Vector3 loc, bool shouldFly)
-    {
-        try
-        {
-            return _vnavSimpleMoveTo.InvokeFunc(loc, shouldFly);
-        }
-        catch (IpcNotReadyError)
-        {
-            _log.Info("VNavMesh: Could not move. (IpcNotReadyError)");
-            return false;
+            movementTasks.Enqueue(() => {
+                var res = VNavmesh_IPCSubscriber.SimpleMove_PathfindAndMoveTo(p, true);
+                log.Debug("Pathfind was: " + res);
+                if (!res)
+                    chat.Print("WARNING: Pathfind was: " + res);
+            });
         }
     }
 
     public void Dispose() {
-        _log.Debug("------ Wow we are disposed!");
+        log.Debug("------ Wow we are disposed!");
         Dalamud.Framework.Update -= Tick;
     }
 
 	private void OnDisable() {
-		_log.Info("VNavMesh IPC has been disabled. Disabling support.");
+		log.Info("VNavMesh IPC has been disabled. Disabling support.");
 		Available = false;
 	}
 }
