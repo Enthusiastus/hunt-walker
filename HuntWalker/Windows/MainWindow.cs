@@ -176,6 +176,35 @@ public class MainWindow : Window, IDisposable
             });
         }
 
+        if (ImGui.Button("Scout EW"))
+        {
+            chat.Print("Queueing to scout all of ShB");
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Labyrinthos!");
+                movementManager.ScoutLabyrinthos();
+            });
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Thavnair!");
+                movementManager.ScoutThavnair();
+            });
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Garlemald!");
+                movementManager.ScoutGarlemald();
+            });
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Mare Lamentorum!");
+                movementManager.ScoutMareLamentorum();
+            });
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Ultima Thule!");
+                movementManager.ScoutUltimaThule();
+            });
+            userTasks.Enqueue(() => {
+                chat.Print("TaskMgr: Starting Elpis!");
+                movementManager.ScoutElpis();
+            });
+        }
+
         if (ImGui.Button("Scout Labyrinthos"))
         {
             chat.Print("Queueing to scout Laybrinthos");
