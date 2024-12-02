@@ -254,7 +254,7 @@ public class MovementManager : IDisposable {
     private readonly IChatGui chat;
     private readonly IPluginLog log;
     private ushort targetTerritory = 0;
-    private int marksFoundInArea = 0;
+    private List<uint> marksFoundInArea = new();
 
     private TimeSpan _lastUpdate = new(0);
     private TimeSpan _execDelay = new(0, 0, 1);
@@ -321,8 +321,13 @@ public class MovementManager : IDisposable {
         chat.Print("We saw " + mark.Name + "("+ mark.MobId+ ")");
         if(movementTasks.NumQueuedTasks > 0 && _ARankbNPCIds.Contains(mark.MobId))
         {
-            marksFoundInArea += 1;
-            chat.Print(marksFoundInArea+"/2 marks found in area.");
+            if(!marksFoundInArea.Contains(mark.MobId))
+            {
+                chat.Print(marksFoundInArea.Count + "/2 marks found in area.");
+            } else
+            {
+                chat.Print("Mark already in list...");
+            }
         }
     }
     private void Tick(IFramework framework)
@@ -350,7 +355,7 @@ public class MovementManager : IDisposable {
         if (!NavReady || IsRunning || IsPathfinding || IsBusy || !CanAct)
             return;
 
-        if (marksFoundInArea > 1)
+        if (marksFoundInArea.Count > 1)
         {
             chat.Print("Found all marks in area. Stopping.");
             Stop();
@@ -370,7 +375,7 @@ public class MovementManager : IDisposable {
 
     public void Stop()
     {
-        marksFoundInArea = 0;
+        marksFoundInArea = new();
         movementTasks.Abort();
         VNavmesh_IPCSubscriber.Path_Stop();
     }
