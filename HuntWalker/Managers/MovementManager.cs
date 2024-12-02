@@ -327,7 +327,7 @@ public class MovementManager : IDisposable {
                 marksFoundInArea.Add(mark.MobId);
             } else
             {
-                chat.Print("Mark already in list...");
+                chat.Print("Mark already in list....");
             }
         }
     }
