@@ -324,6 +324,7 @@ public class MovementManager : IDisposable {
             if(!marksFoundInArea.Contains(mark.MobId))
             {
                 chat.Print(marksFoundInArea.Count + "/2 marks found in area.");
+                marksFoundInArea.Add(mark.MobId);
             } else
             {
                 chat.Print("Mark already in list...");
