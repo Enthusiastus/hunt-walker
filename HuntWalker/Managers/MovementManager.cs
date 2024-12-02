@@ -131,12 +131,12 @@ public class MovementManager : IDisposable {
         new Vector3((float) -399.6,(float) 161.9,(float) -204.7), // "13.5, 17.4"
         new Vector3((float) -164.9,(float) 386.9,(float) -404.6), // "18.2, 13.4"
         new Vector3((float) -284.6,(float) 411.2,(float) -565.8), // "15.7, 10.3"
-        new Vector3((float) -654.3,(float) 408.3,(float) -654.3), // "8.4, 8.4"
-        new Vector3((float) -503.9,(float) 402.8,(float) -811.9), // "11.4, 5.2"
         new Vector3((float) -20.1,(float) 443.5,(float) -689.3), // "21.1, 7.7"
         new Vector3((float) 185.8,(float) 382.7,(float) -427.9), // "25.3, 13.0"
         new Vector3((float) 344.6,(float) 400.7,(float) -654.2), // "28.4, 8.4"
-        new Vector3((float) 484.5,(float) 457.8,(float) -874.0) // "31.2, 4.0"
+        new Vector3((float) 484.5,(float) 457.8,(float) -874.0), // "31.2, 4.0"
+        new Vector3((float) -503.9,(float) 402.8,(float) -811.9), // "11.4, 5.2"
+        new Vector3((float) -654.3,(float) 408.3,(float) -654.3) // "8.4, 8.4"
     };
 
     public List<Vector3> LabyrinthosWaypoints = new()
@@ -693,6 +693,7 @@ public class MovementManager : IDisposable {
 
     public void Dispose() {
         log.Debug("------ Wow we are disposed!");
+        hhMarkSeen.Unsubscribe(OnMarkSeen);
         Dalamud.Framework.Update -= Tick;
     }
 
