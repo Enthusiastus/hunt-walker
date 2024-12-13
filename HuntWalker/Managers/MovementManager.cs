@@ -9,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using Dalamud.Game.ClientState.Conditions;
 using HuntWalker.Models;
 using ECommons.Automation.NeoTaskManager;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace HuntWalker.Managers;
 
@@ -253,6 +254,7 @@ public class MovementManager : IDisposable {
 
     private readonly IChatGui chat;
     private readonly IPluginLog log;
+    private readonly IObjectTable objectTable;
     private ushort targetTerritory = 0;
     private List<uint> marksFoundInArea = new();
 
@@ -301,33 +303,32 @@ public class MovementManager : IDisposable {
     public MovementManager(
 		IDalamudPluginInterface pluginInterface,
         IChatGui chat,
-        IPluginLog log
-	) {
+        IPluginLog log,
+        IObjectTable objectTable
+    ) {
         this.chat = chat;
 		this.log = log;
+        this.objectTable = objectTable;
 		Available = true;
         movementTasks = new TaskManager(new TaskManagerConfiguration(600000, false, true, false, false, true, true));
         movementTasks.StepMode = true;
 
-        hhMarkSeen = pluginInterface.GetIpcSubscriber<TrainMob, bool>("HH.channel.MarkSeen");
-
-        hhMarkSeen.Subscribe(OnMarkSeen);
-
         log.Debug("------ Wow we are instanced!");
         Dalamud.Framework.Update += Tick;
     }
-    public void OnMarkSeen(TrainMob mark)
+    public void OnMarkSeen(IBattleNpc mark)
     {
-        chat.Print("We saw " + mark.Name + "("+ mark.MobId+ ")");
-        if(movementTasks.NumQueuedTasks > 0 && _ARankbNPCIds.Contains(mark.MobId))
+        log.Debug("We are seeing " + mark.Name + "("+ mark.NameId+ ")");
+        if(movementTasks.NumQueuedTasks > 0 && _ARankbNPCIds.Contains(mark.NameId))
         {
-            if(!marksFoundInArea.Contains(mark.MobId))
+            if(!marksFoundInArea.Contains(mark.NameId))
             {
+                chat.Print("Adding "+mark.Name + "("+mark.NameId+") to the seen list.");
+                marksFoundInArea.Add(mark.NameId);
                 chat.Print(marksFoundInArea.Count + "/2 marks found in area.");
-                marksFoundInArea.Add(mark.MobId);
             } else
             {
-                chat.Print("Mark already in list....");
+                log.Debug("Mark already in list....");
             }
         }
     }
@@ -341,8 +342,22 @@ public class MovementManager : IDisposable {
         }
     }
 
+    private void CheckObjectTable()
+    {
+        foreach (var obj in objectTable)
+        {
+            if (obj is not IBattleNpc mob) continue;
+            var battlenpc = mob as IBattleNpc;
+            if(_ARankbNPCIds.Contains(battlenpc.NameId))
+            {
+                OnMarkSeen(battlenpc);
+            }
+        }
+    }
+ 
     private unsafe void DoUpdate(IFramework framework)
     {
+        CheckObjectTable();
         log.Debug(movementTasks.NumQueuedTasks+" Tasks left.");
         if (movementTasks.NumQueuedTasks == 0)
         {
@@ -699,7 +714,6 @@ public class MovementManager : IDisposable {
 
     public void Dispose() {
         log.Debug("------ Wow we are disposed!");
-        hhMarkSeen.Unsubscribe(OnMarkSeen);
         Dalamud.Framework.Update -= Tick;
     }
 

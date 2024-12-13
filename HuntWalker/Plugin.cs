@@ -31,7 +31,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin(IDalamudPluginInterface pluginInterface,
         IChatGui chatGui,
-        IPluginLog pluginLog
+        IPluginLog pluginLog,
+        IObjectTable objectTable
         )
     {
         this.pluginInterface = pluginInterface;
@@ -46,6 +47,7 @@ public sealed class Plugin : IDalamudPlugin
             .AddSingleton(pluginInterface)
             .AddSingleton(chatGui)
             .AddSingleton(pluginLog)
+            .AddSingleton(objectTable)
             .AddSingleton<Configuration>()
             .AddSingleton<MovementManager>()
             .AddSingleton<MainWindow>()
