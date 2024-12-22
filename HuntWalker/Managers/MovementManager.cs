@@ -169,6 +169,7 @@ public class MovementManager : IDisposable {
 
     public List<Vector3> GarlemaldWaypoints = new()
     {
+        new Vector3((float) -407.7,(float) 45.8,(float) 479.6), // Do not stuck on houses around aetheryte
         new Vector3((float) 294.6,(float) 9.0,(float) 624.4), // "27.4, 34.0"
         new Vector3((float) 549.3,(float) 5.8,(float) 544.5), // "32.5, 32.4"
         new Vector3((float) 574.3,(float) 35.0,(float) 20.1), // "33.0, 21.9"

@@ -29,7 +29,7 @@ public class MainWindow : Window, IDisposable
         MovementManager movementManager,
         IChatGui chat,
         IPluginLog log)
-        : base("My Amazing Window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Hunt Walker##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         this.chat = chat;
         this.log = log;
@@ -178,7 +178,7 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button("Scout EW"))
         {
-            chat.Print("Queueing to scout all of ShB");
+            chat.Print("Queueing to scout all of Endwalker");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Labyrinthos!");
                 movementManager.ScoutLabyrinthos();
