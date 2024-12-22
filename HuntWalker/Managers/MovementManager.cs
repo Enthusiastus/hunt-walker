@@ -344,6 +344,8 @@ public class MovementManager : IDisposable {
 
     private void CheckObjectTable()
     {
+        if (Dalamud.ClientState.TerritoryType != targetTerritory)
+            return;
         foreach (var obj in objectTable)
         {
             if (obj is not IBattleNpc mob) continue;
@@ -357,8 +359,8 @@ public class MovementManager : IDisposable {
  
     private unsafe void DoUpdate(IFramework framework)
     {
-        CheckObjectTable();
         log.Debug(movementTasks.NumQueuedTasks+" Tasks left.");
+        CheckObjectTable();
         if (movementTasks.NumQueuedTasks == 0)
         {
             log.Debug("DoUpdate! rdy " + NavReady + " !run " + !IsRunning + " !pathfind " + !IsPathfinding + " !busy " + !IsBusy + " canact " + CanAct);
