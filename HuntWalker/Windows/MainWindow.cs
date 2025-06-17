@@ -81,7 +81,7 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button("STOP ALL"))
         {
-            chat.Print("Stopping...");
+            chat.Print("Stopping ALL...");
             movementManager.Stop();
             userTasks.Abort();
         }
