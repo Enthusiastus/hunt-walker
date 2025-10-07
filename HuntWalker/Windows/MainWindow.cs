@@ -5,7 +5,6 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 using HuntWalker.Managers;
 using Serilog;
 using ECommons.Automation.NeoTaskManager;
