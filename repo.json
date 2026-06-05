@@ -4,16 +4,19 @@
     "Name": "Hunt Walker",
     "InternalName": "HuntWalker",
     "Description": "Automagically walks you around the world to find S and A ranks.",
-    "AssemblyVersion": "0.1.15",
-    "TestingAssemblyVersion": "0.1.15",
+    "AssemblyVersion": "0.1.16",
+    "TestingAssemblyVersion": "0.1.16",
     "RepoUrl": "https://github.com/Enthusiastus/hunt-walker",
     "IconUrl": "https://github.com/Enthusiastus/hunt-walker/raw/main/icon.png",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 14,
     "TestingDalamudApiLevel": 14,
-    "Tags": ["hunt", "vnavmesh"],
-    "DownloadLinkInstall": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.15/latest.zip",
-    "DownloadLinkTesting": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.15/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.15/latest.zip"
+    "Tags": [
+      "hunt",
+      "vnavmesh"
+    ],
+    "DownloadLinkInstall": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.16/latest.zip",
+    "DownloadLinkTesting": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.16/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/Enthusiastus/hunt-walker/releases/download/v0.1.16/latest.zip"
   }
 ]
