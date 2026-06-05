@@ -272,7 +272,7 @@ public class MovementManager : IDisposable {
     {
         get
         {
-            if (Dalamud.ClientState.LocalPlayer == null)
+            if (Dalamud.ObjectTable.LocalPlayer == null)
                 return false;
             if (Dalamud.Conditions[ConditionFlag.BetweenAreas] ||
                 Dalamud.Conditions[ConditionFlag.BetweenAreas51] ||
@@ -284,7 +284,7 @@ public class MovementManager : IDisposable {
                 Dalamud.Conditions[ConditionFlag.LoggingOut] ||
                 Dalamud.Conditions[ConditionFlag.Occupied] ||
                 Dalamud.Conditions[ConditionFlag.Unconscious] ||
-                Dalamud.ClientState.LocalPlayer.CurrentHp < 1)
+                Dalamud.ObjectTable.LocalPlayer.CurrentHp < 1)
                 return false;
             return true;
         }

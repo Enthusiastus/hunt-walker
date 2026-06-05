@@ -76,7 +76,7 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button("Get Position"))
         {
-            chat.Print("I am at " + Dalamud.ClientState.LocalPlayer.Position);
+            chat.Print("I am at " + Dalamud.ObjectTable.LocalPlayer.Position);
         }
 
         if (ImGui.Button("STOP ALL"))
