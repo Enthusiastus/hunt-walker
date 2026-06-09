@@ -48,6 +48,7 @@ public class MainWindow : Window, IDisposable
     private void HandleMovementDone(object? sender, EventArgs e)
     {
         log.Debug("MainWindow: Movement is done, queue next inputs.");
+        movementManager.StopTicking();
         userTasks.Step();
     }
 
@@ -97,28 +98,35 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout all of ShB");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Lakeland!");
+                movementManager.StartTicking();
                 movementManager.ScoutLakeland();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Kholusia!");
+                movementManager.StartTicking();
                 movementManager.ScoutKholusia();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Ahm Ahreng!");
+                movementManager.StartTicking();
                 movementManager.ScoutAhmAhreng();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Il Mheg!");
+                movementManager.StartTicking();
                 movementManager.ScoutIlMheg();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting RakTika!");
+                movementManager.StartTicking();
                 movementManager.ScoutRakTika();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Tempest!");
+                movementManager.StartTicking();
                 movementManager.ScoutTempest();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Lakeland"))
@@ -126,8 +134,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Lakeland");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Lakeland!");
+                movementManager.StartTicking();
                 movementManager.ScoutLakeland(); 
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Kholusia"))
@@ -135,8 +145,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Kholusia");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Kholusia!");
+                movementManager.StartTicking();
                 movementManager.ScoutKholusia();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Ahm Ahreng"))
@@ -144,9 +156,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Ahm Ahreng");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Ahm Ahreng!");
+                movementManager.StartTicking();
                 movementManager.ScoutAhmAhreng();
             });
-            
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Il Mheg"))
@@ -154,8 +167,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Il Mheg");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Il Mheg!");
+                movementManager.StartTicking();
                 movementManager.ScoutIlMheg();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Rak'tika Greatwood"))
@@ -163,8 +178,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout The Rak'tika Greatwood");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting RakTika!");
+                movementManager.StartTicking();
                 movementManager.ScoutRakTika();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Tempest"))
@@ -172,8 +189,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Tempest");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Tempest!");
+                movementManager.StartTicking();
                 movementManager.ScoutTempest();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout EW"))
@@ -181,28 +200,35 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout all of Endwalker");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Labyrinthos!");
+                movementManager.StartTicking();
                 movementManager.ScoutLabyrinthos();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Thavnair!");
+                movementManager.StartTicking();
                 movementManager.ScoutThavnair();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Garlemald!");
+                movementManager.StartTicking();
                 movementManager.ScoutGarlemald();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Mare Lamentorum!");
+                movementManager.StartTicking();
                 movementManager.ScoutMareLamentorum();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Ultima Thule!");
+                movementManager.StartTicking();
                 movementManager.ScoutUltimaThule();
             });
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Elpis!");
+                movementManager.StartTicking();
                 movementManager.ScoutElpis();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Labyrinthos"))
@@ -210,9 +236,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Laybrinthos");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Labyrinthos!");
+                movementManager.StartTicking();
                 movementManager.ScoutLabyrinthos();
             });
-            
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Thavnair"))
@@ -220,8 +247,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Thavnair");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Thavnair!");
+                movementManager.StartTicking();
                 movementManager.ScoutThavnair();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Garlemald"))
@@ -229,8 +258,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Garlemald");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Garlemald!");
+                movementManager.StartTicking();
                 movementManager.ScoutGarlemald();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Mare Lamentorum"))
@@ -238,8 +269,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Mare Lamentorum");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Mare Lamentorum!");
+                movementManager.StartTicking();
                 movementManager.ScoutMareLamentorum();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Ultima Thule"))
@@ -247,8 +280,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Ultima Thule");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Ultima Thule!");
+                movementManager.StartTicking();
                 movementManager.ScoutUltimaThule();
             });
+            userTasks.Step();
         }
 
         if (ImGui.Button("Scout Elpis"))
@@ -256,8 +291,10 @@ public class MainWindow : Window, IDisposable
             chat.Print("Queueing to scout Elpis");
             userTasks.Enqueue(() => {
                 chat.Print("TaskMgr: Starting Elpis!");
+                movementManager.StartTicking();
                 movementManager.ScoutElpis();
             });
+            userTasks.Step();
         }
 
         ImGui.Spacing();

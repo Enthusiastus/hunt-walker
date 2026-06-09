@@ -315,8 +315,19 @@ public class MovementManager : IDisposable {
         movementTasks.StepMode = true;
 
         log.Debug("------ Wow we are instanced!");
+        
+    }
+
+    public void StartTicking() {
+        log.Debug($"MovementManager started ticking!");
         Dalamud.Framework.Update += Tick;
     }
+
+    public void StopTicking() {
+        log.Debug($"MovementManager stopped ticking!");
+        Dalamud.Framework.Update -= Tick;
+    }
+
     public void OnMarkSeen(IBattleNpc mark)
     {
         log.Debug("We are seeing " + mark.Name + "("+ mark.NameId+ ")");
