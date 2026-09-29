@@ -295,6 +295,7 @@ public class MovementManager : IDisposable {
     public bool IsRunning => VNavmesh_IPCSubscriber.Path_IsRunning();
     public bool IsPathfinding => VNavmesh_IPCSubscriber.Nav_PathfindInProgress();
     public bool NavReady => VNavmesh_IPCSubscriber.Nav_IsReady();
+    public int NumQueuedTasks => movementTasks.NumQueuedTasks;
 
     private readonly ICallGateSubscriber<TrainMob, bool> hhMarkSeen;
 

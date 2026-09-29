@@ -57,6 +57,8 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         ImGui.Text($"The random config bool is {config.SomePropertyToBeSavedAndWithADefault}");
+        ImGui.Text($"userTasks in queue: {userTasks.NumQueuedTasks}");
+        ImGui.Text($"movementTasks in queue: {movementManager.NumQueuedTasks}");
 
         /*
         if (ImGui.Button("Show Settings"))
@@ -129,7 +131,9 @@ public class MainWindow : Window, IDisposable
             userTasks.Step();
         }
 
-        if (ImGui.Button("Scout Lakeland"))
+        if (ImGui.CollapsingHeader("Scout ShB Subregions"))
+        {
+            if (ImGui.Button("Scout Lakeland"))
         {
             chat.Print("Queueing to scout Lakeland");
             userTasks.Enqueue(() => {
@@ -194,6 +198,7 @@ public class MainWindow : Window, IDisposable
             });
             userTasks.Step();
         }
+        }
 
         if (ImGui.Button("Scout EW"))
         {
@@ -231,87 +236,73 @@ public class MainWindow : Window, IDisposable
             userTasks.Step();
         }
 
-        if (ImGui.Button("Scout Labyrinthos"))
+        if (ImGui.CollapsingHeader("Scout EW Subregions"))
         {
-            chat.Print("Queueing to scout Laybrinthos");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Labyrinthos!");
-                movementManager.StartTicking();
-                movementManager.ScoutLabyrinthos();
-            });
-            userTasks.Step();
-        }
+            if (ImGui.Button("Scout Labyrinthos"))
+            {
+                chat.Print("Queueing to scout Laybrinthos");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Labyrinthos!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutLabyrinthos();
+                });
+                userTasks.Step();
+            }
 
-        if (ImGui.Button("Scout Thavnair"))
-        {
-            chat.Print("Queueing to scout Thavnair");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Thavnair!");
-                movementManager.StartTicking();
-                movementManager.ScoutThavnair();
-            });
-            userTasks.Step();
-        }
+            if (ImGui.Button("Scout Thavnair"))
+            {
+                chat.Print("Queueing to scout Thavnair");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Thavnair!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutThavnair();
+                });
+                userTasks.Step();
+            }
 
-        if (ImGui.Button("Scout Garlemald"))
-        {
-            chat.Print("Queueing to scout Garlemald");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Garlemald!");
-                movementManager.StartTicking();
-                movementManager.ScoutGarlemald();
-            });
-            userTasks.Step();
-        }
+            if (ImGui.Button("Scout Garlemald"))
+            {
+                chat.Print("Queueing to scout Garlemald");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Garlemald!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutGarlemald();
+                });
+                userTasks.Step();
+            }
 
-        if (ImGui.Button("Scout Mare Lamentorum"))
-        {
-            chat.Print("Queueing to scout Mare Lamentorum");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Mare Lamentorum!");
-                movementManager.StartTicking();
-                movementManager.ScoutMareLamentorum();
-            });
-            userTasks.Step();
-        }
+            if (ImGui.Button("Scout Mare Lamentorum"))
+            {
+                chat.Print("Queueing to scout Mare Lamentorum");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Mare Lamentorum!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutMareLamentorum();
+                });
+                userTasks.Step();
+            }
 
-        if (ImGui.Button("Scout Ultima Thule"))
-        {
-            chat.Print("Queueing to scout Ultima Thule");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Ultima Thule!");
-                movementManager.StartTicking();
-                movementManager.ScoutUltimaThule();
-            });
-            userTasks.Step();
-        }
+            if (ImGui.Button("Scout Ultima Thule"))
+            {
+                chat.Print("Queueing to scout Ultima Thule");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Ultima Thule!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutUltimaThule();
+                });
+                userTasks.Step();
+            }
 
-        if (ImGui.Button("Scout Elpis"))
-        {
-            chat.Print("Queueing to scout Elpis");
-            userTasks.Enqueue(() => {
-                chat.Print("TaskMgr: Starting Elpis!");
-                movementManager.StartTicking();
-                movementManager.ScoutElpis();
-            });
-            userTasks.Step();
+            if (ImGui.Button("Scout Elpis"))
+            {
+                chat.Print("Queueing to scout Elpis");
+                userTasks.Enqueue(() => {
+                    chat.Print("TaskMgr: Starting Elpis!");
+                    movementManager.StartTicking();
+                    movementManager.ScoutElpis();
+                });
+                userTasks.Step();
+            }
         }
-
-        ImGui.Spacing();
-
-        ImGui.Text("Have a goat:");
-        /*
-        var goatImage = Plugin.TextureProvider.GetFromFile(GoatImagePath).GetWrapOrDefault();
-        if (goatImage != null)
-        {
-            ImGuiHelpers.ScaledIndent(55f);
-            ImGui.Image(goatImage.ImGuiHandle, new Vector2(goatImage.Width, goatImage.Height));
-            ImGuiHelpers.ScaledIndent(-55f);
-        }
-        else
-        {
-            ImGui.Text("Image not found.");
-        }
-        */
     }
 }
