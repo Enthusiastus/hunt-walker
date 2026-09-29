@@ -9,8 +9,8 @@
     "RepoUrl": "https://github.com/Enthusiastus/hunt-walker",
     "IconUrl": "https://github.com/Enthusiastus/hunt-walker/raw/main/icon.png",
     "ApplicableVersion": "any",
-    "DalamudApiLevel": 14,
-    "TestingDalamudApiLevel": 14,
+    "DalamudApiLevel": 15,
+    "TestingDalamudApiLevel": 15,
     "Tags": [
       "hunt",
       "vnavmesh"
